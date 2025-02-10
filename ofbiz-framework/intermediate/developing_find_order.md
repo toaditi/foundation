@@ -59,7 +59,7 @@ By completing this assignment, you will:
 5. Validate the service by calling it with different search parameters.  
 
 ### **Step 5: Creating and Updating Orders**  
-1. Define a service called `createOrder` to add new orders. The service should:  
+1. Use the `createOrder` to add new orders. The service should:  
    - Take the customer ID, ordered items (product IDs and quantities), shipping address, and payment preferences as required fields.  
    - Automatically generate an Order ID.  
    - Set the initial order status to `"ORDER_CREATED"`.  
@@ -111,4 +111,3 @@ By completing this assignment, you will:
 3. **Entity Relationships** – The `FindOrderView` entity should correctly join relevant data tables.  
 4. **Service Implementation** – Services should handle input validation and ensure data integrity.  
 5. **Event Handling** – Events should be correctly mapped and triggered within OFBiz.  
-
