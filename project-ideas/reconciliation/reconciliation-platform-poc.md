@@ -37,7 +37,15 @@ This single question defines the POC logic and success criteria.
 - OMS - Downstream system expected to receive orders
 - Reconciliation Service - Standalone validation layer
 
-## 5. Data Collection Approach (POC)
+## 5. Services Needed (POC Only)
+
+- SFTP endpoint for POS and OMS CSV drops
+- Ingestion job to load CSVs into the reconciliation database
+- Reconciliation engine to compare POS vs OMS by `order_id`
+- Reconciliation database to store inputs and results
+- Read-only results access (query or simple view)
+
+## 6. Data Collection Approach (POC)
 
 ### Preferred Method: File-Based Ingestion
 
@@ -53,7 +61,7 @@ This single question defines the POC logic and success criteria.
 - REST APIs
 - GraphQL queries
 
-## 6. Standalone Architecture (POC)
+## 7. Standalone Architecture (POC)
 
 - The reconciliation service will:
 
@@ -66,7 +74,7 @@ This ensures:
 - No production performance risk
 - Safe handling of large datasets
 
-## 7. Reconciliation Logic (POC)
+## 8. Reconciliation Logic (POC)
 
 1. Ingest POS order data
 2. Ingest OMS order data
@@ -79,7 +87,7 @@ This ensures:
 
    - Orders present in POS but missing in OMS
 
-## 8. Output and Results
+## 9. Output and Results
 
 The POC will produce:
 
@@ -91,14 +99,14 @@ The POC will produce:
 
 The output should be simple, inspectable, and easy to validate.
 
-## 9. Operational Flow
+## 10. Operational Flow
 
 1. Data is received (CSV)
 2. Data is persisted
 3. Reconciliation logic runs
 4. Results are stored and exposed
 
-## 10. POC Success Criteria
+## 11. POC Success Criteria
 
 The POC is successful if:
 
