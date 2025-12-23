@@ -1,4 +1,4 @@
-# Reconciliation Run Data Model (Moqui-aligned)
+# Reconciliation Run Data Model
 
 This document defines the **Reconciliation Run configuration data model**, designed using **UDM principles** and aligned with **Moqui framework entities**.
 

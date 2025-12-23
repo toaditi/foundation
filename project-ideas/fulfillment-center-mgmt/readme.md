@@ -1,21 +1,39 @@
 # Fulfillment Application Design Document
 
-1. Fulfillment of sales orders (including basic picking and packing) and receiving of purchase orders
-2. Inventory management including issuance and receipt, and inventory reservation for sales orders
+Manage fulfillment center workflows, including Inventory Management, Order Fulfillment, Purchase and Return Shipment Receipts
 
-## [Store Fulfillment Lifecycle](https://docs.hotwax.co/documents/v/learn-hotwax-oms/business-process-models/store-fulfillment-lifecycle)
+
+1. Fulfillment of orders 
+   a. Pickwaving
+   b. Picking 
+   c. Packing
+   d. Reject Order / Pullback
+
+2. Inventory management 
+   a. Issuance 
+   b. Receipt 
+   c. Inventory reservation for fulfillment orders
+   d. Inventory Cycle Count
+   e. External Inventory Reset
+
+3. Purchase Shipment receipts
+   a. Incoming Shipment
+   b. Put away 
+   
+
+## [Order Fulfillment Lifecycle](https://docs.hotwax.co/documents/v/learn-hotwax-oms/business-process-models/store-fulfillment-lifecycle)
 
 
 Order fulfillment is 3 step process,
 
 ### Step 1: 
 The staff gets the list of Outstanding orders 
-*   Search in "ORDER" solr document, look for 
+*   Find in "ORDER" solr document, look for 
   * facilityId, item approved, shipmentMethod, fulfillmentStatus is NULL
 
 
-  * The user then starts the fulfillment process for set of orders by creating a [Fulfillment wave of orders](createOrderFulfillmentWave.md). A [PickList](../oms/createPickList) is returned for the user to go pick items for preparing the shipments.
-     *  Background process: [Shipments](../oms/createShipment.md) are created for orders.
+  * The user then starts the fulfillment process for set of orders by creating a [Fulfillment wave of orders](createOrderFulfillmentWave.md). A [PickList](createPickList.md) is returned for the user to go pick items for preparing the shipments.
+     *  [Shipments](../oms/createShipment.md) are created for orders OrderItemShiphipGroups passed in to the service.
         - If the order item is a kit product, a distinct reservation will be created with the same order item for each product in the kit. When creating a picklist and shipment, all reservations will be included to ensure a proper fulfillment lifecycle.
 
 Alternativley the user can choose to not proceed with picking and instead choose the following actions:
@@ -36,14 +54,13 @@ User completes the [Packing](packShipment.md). Alternatively user can choose to 
 User marks Shipment shipped.
   * reprint shipping label and other documents
   * [voidShipmentLabel](voidShipmentLabel.md) and request it again.
+  * [unpackShipment](unpackShipment.md)
 
 
-## [Shipment lifecycle](../oms/ShipmentStatusWorkflow.md)
+## [Shipment lifecycle](ShipmentStatusWorkflow.md)
 Shipment is created in SHIPMENT_INPUT, then SHIPMENT_APPROVED to SHIPMENT_PACKED and then SHIPMENT_SHIPPED
 
 ### [On SHIPMENT_APPROVED:](approveShipment.md)
-* If the facility is part of the `AUTO_SHIPPING_LABEL` facility group. The service calls [getShippingLabel](getShippingLabel.md) from the logistics company.
-  * On successful execution of shipping label RateShopping, update ShipmentRouteSegment. Set `shipmentMethodTypeId`, `carrierPartyId`, `actualCost`, `carrierServiceStatusId` (SHRSCS_CONFIRMED). 
 
 * Once we have Shipping label, Shipment can be moved to SHIPMENT_PACKED status.
   * If `isTrackingRequired` is set to **N** in the ProductStoreShipmentMeth entity for the given Shipment Method, then the user can pack the shipment without a shipping label or tracking code.
@@ -57,15 +74,12 @@ Shipment is created in SHIPMENT_INPUT, then SHIPMENT_APPROVED to SHIPMENT_PACKED
 * Order Item is marked Completed
 * Update Shopify order Fulfilled
 
-**Modify contents of the Shipment after it is already SHIPMENT_APPROVED or SHIPMENT_PACKED.**
-Why does the shipment have to be moved out of "approved" status to edit it's contents? For example fulfillment team may want to reject an item after begining pack pick process, in which case shipment will already be packed.
+**Modify contents of the Shipment after it is already SHIPMENT_PACKED.**
+Why does the shipment have to be moved to "approved" or "input" status to edit it's contents? For example fulfillment team may want to reject an item after shipment is packed status.
 
 -   To pack a Shipment, we need shipping label. To give shipping label, shipping carrier need to know the package dimensions and weight.
--   Approving the shipment means communicates that the shipment is now ready for packing, and package type and weight are now final.
-
-
-1. If the Approved shipment should be edited, The Shipment is first [reinitializeShipment](reinitializeShipment.md).To avoid error, the reinitialize process calls [voidShipmentLabel](voidShipmentLabel.md).
-2. In case the Packed shipment should be edited, first [reinitializeShipment](reinitializeShipment.md). It moves shipment from SHIPMENT_PACKED status to SHIPMENT_INPUT, ensure to [voidShipmentPackageLabel](voidShipmentPackageLabel.md). Recompute the [ShipmentPackageWeight](calcShipmentPackageTotalWeight.md).
+-   Packed shipment communicates that the shipment is now ready for shipping, and package type and weight are now final.
+-   If the packed shipment should be edited, The Shipment is [unpacked](unpackShipment.md).To avoid error, the unpack process calls [voidShipmentLabel](voidShipmentLabel.md).
 
 ```
     <!-- ShipmentRouteSegment CarrierService status -->
