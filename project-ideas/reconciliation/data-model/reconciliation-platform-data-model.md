@@ -131,6 +131,7 @@ Represents an **external or internal system instance**.
 - `remote_system_type`
 - `remote_system_name`
 - `environment`
+- `partyId`
 
 ---
 
